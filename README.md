@@ -1,6 +1,6 @@
 # AI for Life Sciences Hackathon 2026 — Age Prediction Challenge
 
-**13 April 2026 · Avenue Campus, University of Southampton**
+**13 April & 12 May 2026 · Avenue Campus, University of Southampton**
 
 > Predict donor chronological age from single-cell RNA-seq data.  
 > Contact: [IfLSAdmin@soton.ac.uk](mailto:IfLSAdmin@soton.ac.uk)
@@ -22,9 +22,9 @@ This is a **regression** task. Predictions are continuous (not integer).
 
 | Date | Milestone |
 |------|-----------|
-| 1 April 2026 | Data released, registration open |
-| 10 April 2026 | Submission deadline (11:59 pm BST) |
-| 13 April 2026 | Hackathon day — presentations & prizes |
+| 8 April 2026 | Data released, competition opens |
+| 13 April 2026 | Hackathon event — presentations & prizes |
+| 12 May 2026 | Final event |
 
 ---
 
@@ -145,6 +145,8 @@ See `submission/submission_template.csv` for the list of test donor IDs.
 
 Submit via email to [IfLSAdmin@soton.ac.uk](mailto:IfLSAdmin@soton.ac.uk) with subject:
 `[AGE CHALLENGE SUBMISSION] Team Name`
+
+Submissions are due before the hackathon event on **13 April 2026**.
 
 ---
 
