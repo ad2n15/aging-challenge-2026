@@ -2,37 +2,53 @@
 
 Data files are too large for git (~20 GB total). They are available on the **Iridis shared space**.
 
+**Layout:** place files under **`data/`** at the repository root (same layout as the shared `.../aging-challenge-2026/data` folder). Teaching notebooks read paths like `data/pseudobulk/...` and `data/geneformer/...`. Generated plots and training runs from notebooks go under **`results/`** (gitignored).
+
+### Iridis shared scratch — use `data/`, not `data_prep/output/`
+
+On the server, large files live here:
+
+`/scratch/aazd1f17/shared_space/aging-challenge-2026/data/`
+
+There is **no** `.../data_prep/output/combined.h5ad` on shared space. The separate folder `.../aging-challenge-2026/data_prep/` only contains a copy of `h5ad_to_pseudobulk.py` for reference, not prepared pipeline output. Always point copies and Apptainer binds at **`.../data`** (see main `README.md`).
+
 ## Iridis users — copy data in one command
 
 ```bash
 # From inside your cloned repo:
 cd ~/aging-challenge-2026
 
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/train.h5ad          data_prep/output/
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/val.h5ad            data_prep/output/
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/test.h5ad           data_prep/output/
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/combined.h5ad       data_prep/output/
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/donor_metadata.csv  data_prep/output/
+mkdir -p data/pseudobulk data/geneformer
 
-mkdir -p data_prep/output/pseudobulk
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/pseudobulk/combined_pseudobulk_combined.h5ad         data_prep/output/pseudobulk/
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/pseudobulk/combined_pseudobulk_donor_aggregated.h5ad data_prep/output/pseudobulk/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/train.h5ad          data/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/val.h5ad            data/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/test.h5ad           data/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/combined.h5ad       data/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/donor_metadata.csv  data/
 
-mkdir -p data_prep/output/geneformer
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer/geneformer_pseudobulk_train.tsv.gz data_prep/output/geneformer/
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer/geneformer_pseudobulk_val.tsv.gz   data_prep/output/geneformer/
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer/geneformer_pseudobulk_test.tsv.gz  data_prep/output/geneformer/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/pseudobulk/combined_pseudobulk_combined.h5ad         data/pseudobulk/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/pseudobulk/combined_pseudobulk_donor_aggregated.h5ad data/pseudobulk/
+
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer/geneformer_pseudobulk_train.tsv.gz data/geneformer/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer/geneformer_pseudobulk_val.tsv.gz   data/geneformer/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer/geneformer_pseudobulk_test.tsv.gz  data/geneformer/
 ```
 
+### Avoid copying (Apptainer bind)
+
+To save disk, mount the shared folder **onto** `data/` instead of copying. See **“Use shared data without copying”** in the main `README.md` for the exact `--bind` lines and a quick `srun` check that `/scratch` is visible on compute nodes.
+
 ## What each notebook needs
+
+Paths are relative to **`data/`**.
 
 | Notebook | Files required |
 |----------|---------------|
 | `01_anndata_and_pseudobulk` | `combined.h5ad`, `pseudobulk/combined_pseudobulk_combined.h5ad`, `pseudobulk/combined_pseudobulk_donor_aggregated.h5ad` |
 | `02_baseline_model` | `pseudobulk/combined_pseudobulk_donor_aggregated.h5ad` |
-| `03_evaluation_metrics` | `pseudobulk/combined_pseudobulk_donor_aggregated.h5ad` + a completed training run |
+| `03_evaluation_metrics` | training run outputs under `results/` + optional `test_labels_hidden.csv` in `data/` for real test metrics |
 | `04_geneformer_embeddings` | `geneformer/geneformer_pseudobulk_{train,val,test}.tsv.gz` |
-| **Model training** | `pseudobulk/combined_pseudobulk_donor_aggregated.h5ad` |
+| **Model training (CLI)** | Pass `--input data/pseudobulk/combined_pseudobulk_donor_aggregated.h5ad` (defaults in `train_age_model.py` still point at `data_prep/output/` for backwards compatibility). |
 | **Submission** | `train.h5ad`, `val.h5ad`, `test.h5ad` (if building your own features) |
 
 ## File sizes

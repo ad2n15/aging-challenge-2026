@@ -10,13 +10,15 @@
 ## Quick start
 
 ```bash
-# 1. Train baseline
+# 1. Train baseline (place competition h5ad under data/ — see data/README.md)
 python models/train_age_model.py \
-    --input data_prep/output/pseudobulk/combined_pseudobulk_donor_aggregated.h5ad
+    --input data/pseudobulk/combined_pseudobulk_donor_aggregated.h5ad
 
 # 2. Evaluate on validation set
 python models/evaluate_val.py --plot
 ```
+
+The teaching notebooks write runs under `results/` by passing `--output-dir`. If you omit `--input` and `--output-dir`, `train_age_model.py` still defaults to paths under `data_prep/output/` and `models/output/` for backwards compatibility.
 
 ## train_age_model.py — options
 

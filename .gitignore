@@ -5,6 +5,12 @@
 data_prep/output/
 data/onek1k/
 
+# ── Notebook / run outputs (generated locally) ───────────────────────────────
+results/
+
+# ── Apptainer image (too large for git; staged on shared scratch) ─────────
+container/*.sif
+
 # ── Model outputs ──────────────────────────────────────────────────────────
 models/output/
 
@@ -38,4 +44,3 @@ Thumbs.db
 
 # ── SLURM logs ────────────────────────────────────────────────────────────
 slurm-*.out
-*.sif

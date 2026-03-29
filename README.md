@@ -84,8 +84,33 @@ Open OnDemand lets you run Jupyter notebooks interactively in the Bionemo contai
 
 5. In the Jupyter file browser, open any notebook under `notebooks/` to get started.
 
-> **Note:** the `--bind /iridisfs/ddnb/Ahmed/data:...` flag mounts the competition data
-> into the container. If the data has been copied to your own path, adjust accordingly.
+#### Use shared data without copying (optional)
+
+Notebooks expect competition files under **`data/`** at the repo root (see `data/README.md`). They do **not** read from `/scratch/...` unless you bind or symlink that path into `data/`.
+
+Binding scratch to itself (`--bind /scratch/.../data:/scratch/.../data`) often **fails** because:
+
+- That path may not exist on the **compute node** where Jupyter runs (scratch layout can differ from the login node).
+- Even when it works, nothing points your code at that path — you would still need symlinks or code changes.
+
+**Working pattern:** mount the shared folder **on top of** `data/` in your clone (second bind overlays that directory only):
+
+```text
+--nv \
+--bind $HOME/aging-challenge-2026:$HOME/aging-challenge-2026 \
+--bind /scratch/aazd1f17/shared_space/aging-challenge-2026/data:$HOME/aging-challenge-2026/data \
+--pwd $HOME/aging-challenge-2026
+```
+
+Replace `$HOME/aging-challenge-2026` if your repo lives elsewhere. **Do not use `-H $PWD`** here unless you know your home is writable inside the container; the two `--bind` lines above are enough.
+
+**Check access from a compute node** (login node is not enough):
+
+```bash
+srun --partition=amd --nodes=1 --time=2:00 ls /scratch/aazd1f17/shared_space/aging-challenge-2026/data
+```
+
+If that fails, ask the cluster admins whether `/scratch/aazd1f17` is visible on batch nodes, or keep using **local copies** of the data (see `data/README.md`).
 
 ---
 
