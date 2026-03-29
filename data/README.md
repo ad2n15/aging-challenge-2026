@@ -2,7 +2,7 @@
 
 Data files are too large for git (~20 GB total). They are available on the **Iridis shared space**.
 
-**Layout:** place files under **`data/`** at the repository root (same layout as the shared `.../aging-challenge-2026/data` folder). Teaching notebooks read paths like `data/pseudobulk/...` and `data/geneformer/...`. Generated plots and training runs from notebooks go under **`results/`** (gitignored).
+**Layout:** place files under **`data/`** at the repository root (same layout as the shared `.../aging-challenge-2026/data` folder). Teaching notebooks read paths like `data/pseudobulk/...`, `data/geneformer/...` (donor-level TSV features), and optionally `data/geneformer_parquet/...` (large cell-level parquet — train/val include `age`; **test** has no `age`). Generated plots and training runs from notebooks go under **`results/`** (gitignored).
 
 ### Iridis shared scratch — use `data/`, not `data_prep/output/`
 
@@ -18,7 +18,7 @@ There is **no** `.../data_prep/output/combined.h5ad` on shared space. The separa
 # From inside your cloned repo:
 cd ~/aging-challenge-2026
 
-mkdir -p data/pseudobulk data/geneformer
+mkdir -p data/pseudobulk data/geneformer data/geneformer_parquet
 
 cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/train.h5ad          data/
 cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/val.h5ad            data/
@@ -32,6 +32,9 @@ cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/pseudobulk/combined_
 cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer/geneformer_pseudobulk_train.tsv.gz data/geneformer/
 cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer/geneformer_pseudobulk_val.tsv.gz   data/geneformer/
 cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer/geneformer_pseudobulk_test.tsv.gz  data/geneformer/
+
+# Optional (~6.5 GB): cell-level Geneformer parquets for notebook 04 (test file has no age column)
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer_parquet/*.parquet data/geneformer_parquet/
 ```
 
 ### Avoid copying (Apptainer bind)
@@ -47,7 +50,7 @@ Paths are relative to **`data/`**.
 | `01_anndata_and_pseudobulk` | `combined.h5ad`, `pseudobulk/combined_pseudobulk_combined.h5ad`, `pseudobulk/combined_pseudobulk_donor_aggregated.h5ad` |
 | `02_baseline_model` | `pseudobulk/combined_pseudobulk_donor_aggregated.h5ad` |
 | `03_evaluation_metrics` | training run outputs under `results/` + optional `test_labels_hidden.csv` in `data/` for real test metrics |
-| `04_geneformer_embeddings` | `geneformer/geneformer_pseudobulk_{train,val,test}.tsv.gz` |
+| `04_geneformer_embeddings` | `geneformer/geneformer_pseudobulk_{train,val,test}.tsv.gz`; optional `geneformer_parquet/*.parquet` for raw cell embeddings |
 | **Model training (CLI)** | Pass `--input data/pseudobulk/combined_pseudobulk_donor_aggregated.h5ad` (defaults in `train_age_model.py` still point at `data_prep/output/` for backwards compatibility). |
 | **Submission** | `train.h5ad`, `val.h5ad`, `test.h5ad` (if building your own features) |
 
