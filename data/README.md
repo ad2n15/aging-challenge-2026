@@ -1,45 +1,55 @@
-# Data Download
+# Data
 
-## Access
+Data files are too large for git (~20 GB total). They are available on the **Iridis shared space**.
 
-The competition data is available via the download link provided in your registration confirmation email.
+## Iridis users — copy data in one command
 
-If you did not receive the link, contact: [IfLSAdmin@soton.ac.uk](mailto:IfLSAdmin@soton.ac.uk)
+```bash
+# From inside your cloned repo:
+cd ~/aging-challenge-2026
 
-## Files
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/train.h5ad          data_prep/output/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/val.h5ad            data_prep/output/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/test.h5ad           data_prep/output/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/combined.h5ad       data_prep/output/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/donor_metadata.csv  data_prep/output/
 
-After downloading and extracting, you will have:
+mkdir -p data_prep/output/pseudobulk
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/pseudobulk/combined_pseudobulk_combined.h5ad         data_prep/output/pseudobulk/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/pseudobulk/combined_pseudobulk_donor_aggregated.h5ad data_prep/output/pseudobulk/
 
-```
-aging_challenge_data/
-├── onek1k/
-│   ├── train.h5ad                                    # 781 donors, age included
-│   ├── val.h5ad                                      #  95 donors, age included
-│   ├── test.h5ad                                     # 105 donors, age EXCLUDED
-│   ├── pseudobulk/
-│   │   ├── combined_pseudobulk_donor_aggregated.h5ad # 981 donors × 141,390 features (recommended)
-│   │   └── combined_pseudobulk_combined.h5ad         # (donor, celltype) × genes
-│   └── donor_metadata.csv                            # donor_id, split, sex, sex_binary
-└── README_data.md
-```
-
-## Placement
-
-Place data relative to this repo root. Recommended layout:
-
-```
-aging_challenge_2026_public/
-├── data_prep/
-│   └── output/
-│       ├── train.h5ad
-│       ├── val.h5ad
-│       ├── test.h5ad
-│       ├── donor_metadata.csv
-│       └── pseudobulk/
-│           └── combined_pseudobulk_donor_aggregated.h5ad   ← start here
+mkdir -p data_prep/output/geneformer
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer/geneformer_pseudobulk_train.tsv.gz data_prep/output/geneformer/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer/geneformer_pseudobulk_val.tsv.gz   data_prep/output/geneformer/
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer/geneformer_pseudobulk_test.tsv.gz  data_prep/output/geneformer/
 ```
 
-This matches the default paths in `models/train_age_model.py`. Or pass `--input` directly.
+## What each notebook needs
+
+| Notebook | Files required |
+|----------|---------------|
+| `01_anndata_and_pseudobulk` | `combined.h5ad`, `pseudobulk/combined_pseudobulk_combined.h5ad`, `pseudobulk/combined_pseudobulk_donor_aggregated.h5ad` |
+| `02_baseline_model` | `pseudobulk/combined_pseudobulk_donor_aggregated.h5ad` |
+| `03_evaluation_metrics` | `pseudobulk/combined_pseudobulk_donor_aggregated.h5ad` + a completed training run |
+| `04_geneformer_embeddings` | `geneformer/geneformer_pseudobulk_{train,val,test}.tsv.gz` |
+| **Model training** | `pseudobulk/combined_pseudobulk_donor_aggregated.h5ad` |
+| **Submission** | `train.h5ad`, `val.h5ad`, `test.h5ad` (if building your own features) |
+
+## File sizes
+
+| File | Size |
+|------|------|
+| `train.h5ad` | 7.8 GB |
+| `val.h5ad` | 1.0 GB |
+| `test.h5ad` | 1.1 GB |
+| `combined.h5ad` | 9.8 GB |
+| `pseudobulk/combined_pseudobulk_donor_aggregated.h5ad` | 1.1 GB |
+| `pseudobulk/combined_pseudobulk_combined.h5ad` | 1.1 GB |
+| `geneformer/*.tsv.gz` | 26 MB total |
+
+## External users
+
+Contact [IfLSAdmin@soton.ac.uk](mailto:IfLSAdmin@soton.ac.uk) for a download link.
 
 ## Data Dictionary
 
