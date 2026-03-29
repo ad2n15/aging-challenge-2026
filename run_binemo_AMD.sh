@@ -22,7 +22,6 @@ apptainer run \
     -H "$PWD" \
     --nv \
     --bind "$PWD:/workspace" \
-    --bind /iridisfs/ddnb/Ahmed/data:/iridisfs/ddnb/Ahmed/data \
     --pwd /workspace \
     "$CONTAINER" \
     python -u "$@"
