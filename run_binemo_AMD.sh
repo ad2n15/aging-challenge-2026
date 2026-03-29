@@ -19,7 +19,6 @@ if [ ! -f "$CONTAINER" ]; then
 fi
 
 apptainer run \
-    -H "$PWD" \
     --nv \
     --bind "$PWD:/workspace" \
     --pwd /workspace \
