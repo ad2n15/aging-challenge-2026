@@ -28,11 +28,89 @@ This is a **regression** task. Predictions are continuous (not integer).
 
 ---
 
+## Getting Started on Iridis X (University of Southampton HPC)
+
+### Step 1 — Get the repository and container
+
+The competition repo and the Bionemo container are pre-staged on the shared scratch space.
+Copy them to your home directory:
+
+```bash
+cp -r /scratch/aazd1f17/shared_space/aging-challenge-2026 ~/aging-challenge-2026
+```
+
+This gives you:
+```
+~/aging-challenge-2026/
+├── container/
+│   └── bionemo-framework_nightly.sif   ← Apptainer container (all dependencies included)
+├── notebooks/                           ← teaching notebooks
+├── models/                              ← baseline scripts
+├── data_prep/
+└── ...
+```
+
+Alternatively, clone from GitHub and download the container separately:
+```bash
+git clone https://github.com/ad2n15/aging-challenge-2026.git ~/aging-challenge-2026
+# Container is too large for git — copy it from shared space:
+cp /scratch/aazd1f17/shared_space/aging-challenge-2026/container/bionemo-framework_nightly.sif \
+   ~/aging-challenge-2026/container/
+```
+
+---
+
+### Step 2 — Launch Jupyter via Open OnDemand
+
+Open OnDemand lets you run Jupyter notebooks interactively in the Bionemo container
+**without writing any SLURM scripts**.
+
+1. Go to **[https://iridisondemand.soton.ac.uk/pun/sys/dashboard](https://iridisondemand.soton.ac.uk/pun/sys/dashboard)**
+   and log in with your Iridis credentials.
+
+2. Click the **"Jupyter with Apptainer Test"** icon.
+
+3. Fill in the form:
+
+   | Field | Value |
+   |-------|-------|
+   | **Working Directory** | `~/aging-challenge-2026` (or leave as `$HOME`) |
+   | **Submission Environment** | `container (advanced)` |
+   | **Container File** | `/scratch/aazd1f17/shared_space/aging-challenge-2026/container/bionemo-framework_nightly.sif` — or, if you copied it locally: `~/aging-challenge-2026/container/bionemo-framework_nightly.sif` |
+   | **Apptainer flags** | `-H $PWD --nv --bind /iridisfs/ddnb/Ahmed/data:/iridisfs/ddnb/Ahmed/data --bind "$PWD:/workspace"` |
+
+4. Click **Launch** and wait for the session to start (~1–2 min).
+
+5. In the Jupyter file browser, open any notebook under `notebooks/` to get started.
+
+> **Note:** the `--bind /iridisfs/ddnb/Ahmed/data:...` flag mounts the competition data
+> into the container. If the data has been copied to your own path, adjust accordingly.
+
+---
+
+### Step 3 — Run scripts from the terminal (batch jobs)
+
+For longer runs (training, pseudobulk generation), submit via SLURM:
+
+```bash
+cd ~/aging-challenge-2026
+
+# Train baseline model
+sbatch run_binemo_AMD.sh models/train_age_model.py \
+    --input PATH/TO/pseudobulk/combined_pseudobulk_donor_aggregated.h5ad
+
+# Monitor job
+tail -f slurm-JOBID.out
+```
+
+---
+
 ## Data
 
 ### Access
 
-Download the competition data package from the link provided in the registration email:
+Download the competition data package from the link provided in the registration email.
+**Iridis users:** data is already available — see Step 1 above.
 
 ```
 aging_challenge_data/
