@@ -78,7 +78,7 @@ Open OnDemand lets you run Jupyter notebooks interactively in the Bionemo contai
    | **User Interface** | `Jupyter Lab` |
    | **Submission Environment** | `container (advanced)` |
    | **Container File** | `/scratch/aazd1f17/shared_space/aging-challenge-2026/container/bionemo-framework_nightly.sif` — or, if you copied it locally: `~/aging-challenge-2026/container/bionemo-framework_nightly.sif` |
-   | **Apptainer flags** | `--nv --bind $PWD:/workspace --pwd /workspace` |
+   | **Apptainer flags** | `--nv --bind $PWD:$PWD --pwd $PWD` |
 
 4. Click **Launch** and wait for the session to start (~1–2 min).
 

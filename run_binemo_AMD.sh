@@ -20,7 +20,7 @@ fi
 
 apptainer run \
     --nv \
-    --bind "$PWD:/workspace" \
-    --pwd /workspace \
+    --bind "$PWD:$PWD" \
+    --pwd "$PWD" \
     "$CONTAINER" \
     python -u "$@"
