@@ -47,6 +47,7 @@ Paths are relative to **`data/`**.
 
 | Notebook | Files required |
 |----------|---------------|
+| `00_biology_genome_and_ngs_primer` | *None* (conceptual background only) |
 | `01_anndata_and_pseudobulk` | `combined_public.h5ad`, `pseudobulk/combined_pseudobulk_combined_public.h5ad`, `pseudobulk/combined_pseudobulk_donor_aggregated_public.h5ad` |
 | `02_baseline_model` | `pseudobulk/combined_pseudobulk_donor_aggregated_public.h5ad` |
 | `03_evaluation_metrics` | training run outputs under `results/` + optional `test_labels_hidden.csv` in `data/` for real test metrics |
@@ -90,10 +91,12 @@ Contact [IfLSAdmin@soton.ac.uk](mailto:IfLSAdmin@soton.ac.uk) for a download lin
 |--------|-------------|
 | `donor_id` | Anonymised integer matching h5ad |
 | `split` | train / val / test |
+| `age` | Donor age in years (**train/val only**; **empty for test** in published `data/`) |
 | `sex` | male / female |
 | `sex_binary` | 0 = female, 1 = male |
+| `self_reported_ethnicity` | Where present in the release |
 
-Note: age is intentionally excluded from test donors in all public files.
+The internal pipeline CSV can include ages for test donors; `prepare_shared_scratch.sh` runs `scripts/strip_test_age_donor_metadata.py` so the published file does not.
 
 ### Strip test `age` before publishing (organisers)
 
@@ -105,7 +108,7 @@ python scripts/strip_test_age_h5ad.py --input-dir /path/to/internal --output-dir
 # default filenames: `combined_public.h5ad`, `pseudobulk/combined_pseudobulk_*_public.h5ad`
 ```
 
-`scripts/prepare_shared_scratch.sh` copies those `*_public.h5ad` files into shared `data/` **with the same names** (no rename).
+`scripts/prepare_shared_scratch.sh` copies those `*_public.h5ad` files into shared `data/` **with the same names** (no rename) and clears test-split ages in `donor_metadata.csv`.
 
 ### Verify test split has no age (release check)
 

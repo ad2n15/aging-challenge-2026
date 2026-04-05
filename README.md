@@ -86,7 +86,7 @@ Open OnDemand lets you run Jupyter notebooks interactively in the Bionemo contai
 
 4. Click **Launch** and wait for the session to start (~1–2 min).
 
-5. In the Jupyter file browser, open any notebook under `notebooks/` to get started.
+5. In the Jupyter file browser, open notebooks under `notebooks/`. New to molecular biology? Start with **`00_biology_genome_and_ngs_primer.ipynb`**, then **`01_anndata_and_pseudobulk.ipynb`**.
 
 #### Use shared data without copying (optional)
 
@@ -202,6 +202,7 @@ aging_challenge_2026_public/
 │   ├── evaluate_val.py                ← evaluate your val predictions
 │   └── README.md
 ├── notebooks/
+│   ├── 00_biology_genome_and_ngs_primer.ipynb  ← genome → RNA-seq → h5ad (no biology background needed to start here)
 │   ├── 01_anndata_and_pseudobulk.ipynb     ← understand the data format
 │   ├── 02_baseline_model.ipynb             ← run and understand the baseline
 │   ├── 03_evaluation_metrics.ipynb         ← understand MAE, R², Pearson, Spearman
