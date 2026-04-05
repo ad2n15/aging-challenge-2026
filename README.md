@@ -16,6 +16,10 @@ method you choose.
 
 This is a **regression** task. Predictions are continuous (not integer).
 
+![Schematic: multi-modal blood data (scRNA-seq pseudobulk, Geneformer embeddings, optional covariates) combined in a model to predict donor age](images/challenge_multimodal_overview.svg)
+
+*You may combine transcriptomic features, pre-trained single-cell embeddings, and optional covariates (where provided) to estimate chronological age — the baseline uses pseudobulk + Random Forest; other fusion strategies are encouraged.*
+
 ---
 
 ## Timeline
