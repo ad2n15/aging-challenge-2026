@@ -2,6 +2,9 @@
 
 **13 April & 12 May 2026 · Avenue Campus, University of Southampton**
 
+**13 April hackathon day** — **Computer Workstation 2141**, **Building 65**, Avenue Campus, University of Southampton. **9:30–16:30.**  
+Programme timetable: [tables/AI_hackathon_14th_april_time_table.md](tables/AI_hackathon_14th_april_time_table.md)
+
 > Predict donor chronological age from single-cell RNA-seq data.  
 > Contact: [IfLSAdmin@soton.ac.uk](mailto:IfLSAdmin@soton.ac.uk)
 
@@ -9,7 +12,7 @@
 
 ![Time and biological aging](images/Time_aging.jpg)
 
-Ageing impacts our immune systems, increasing the susceptibility to inflammation-driven disorders, including non-malignant diseases such as atherosclerotic cardiovascular diseases, and malignant diseases such as blood cancers. "Aging clock" is the using of machine-learning methods to capture the dynamics of aging through the integration of aging-related markers at the molecular level. Single-cell RNA-sequencing (scRNA-seq) provide the potential to develop cell-type-specific aging models.
+Living longer—and staying healthy in later life—is a widely shared hope among the public and a major focus for researchers who study ageing and disease. However, chronological ageing still alters our biology in ways that can undermine that goal. Ageing impacts our immune systems, increasing susceptibility to inflammation-driven disorders, including non-malignant diseases such as atherosclerotic cardiovascular disease, and malignant diseases such as blood cancers. An **aging clock** uses machine-learning methods to capture the dynamics of ageing by integrating ageing-related markers at the molecular level. Single-cell RNA-sequencing (scRNA-seq) offers the potential to develop cell-type-specific ageing models.
 
 ---
 
