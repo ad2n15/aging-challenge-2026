@@ -5,6 +5,10 @@
 > Predict donor chronological age from single-cell RNA-seq data.  
 > Contact: [IfLSAdmin@soton.ac.uk](mailto:IfLSAdmin@soton.ac.uk)
 
+## Introduction
+
+Ageing impacts our immune systems, increasing the susceptibility to inflammation-driven disorders, including non-malignant diseases such as atherosclerotic cardiovascular diseases, and malignant diseases such as blood cancers. "Aging clock" is the using of machine-learning methods to capture the dynamics of aging through the integration of aging-related markers at the molecular level. Single-cell RNA-sequencing (scRNA-seq) provide the potential to develop cell-type-specific aging models.
+
 ---
 
 ## The Challenge
@@ -14,7 +18,7 @@ You are given **peripheral blood mononuclear cell (PBMC) single-cell RNA-seq** d
 Your goal is to predict each donor's **chronological age** as accurately as possible using any
 method you choose.
 
-This is a **regression** task. Predictions are continuous (not integer).
+
 
 ![Schematic: multi-modal blood data (scRNA-seq pseudobulk, Geneformer embeddings, optional covariates) combined in a model to predict donor age](images/challenge_multimodal_overview.svg)
 
@@ -26,9 +30,35 @@ This is a **regression** task. Predictions are continuous (not integer).
 
 | Date | Milestone |
 |------|-----------|
-| 8 April 2026 | Data released, competition opens |
-| 13 April 2026 | Hackathon event — presentations & prizes |
-| 12 May 2026 | Final event |
+| 9 April 2026 | Data released, competition opens |
+| 13 April 2026 | Hackathon day, and test data released (ages hidden) |
+| 4 May 2026 | Final results submission deadline |
+| 12 May 2026 | Final event; presentations and prizes |
+
+## Competition data
+
+The **train**, **validation**, and **test** splits **partition 981 donors** in total. **Age** is given to competitors only where noted in the table below.
+
+| Data split | Number of individuals | Age (available or hidden) | Date of release |
+|------------|----------------------:|---------------------------|-------------------|
+| Training data | 781 | Available | 9 April 2026 |
+| Validation data | 95 | Available | 9 April 2026 |
+| Test data | 105 | Hidden | 13 April 2026 |
+
+File paths and column-level specs: [data/README.md](data/README.md).
+
+### Raw data
+
+- **Single-cell RNA-seq** — Cell-level gene expression as a sparse **cells × genes** count matrix in AnnData (`.h5ad`), with per-cell metadata (`donor_id`, `celltype`, QC fields, etc.), released **per split** (`train` / `val` / `test`).
+- **Genotyping (VCF)** — Variant call format with one column per competition `donor_id`, containing reference/alternate alleles and per-sample genotype fields (the primary **raw** genetic readout for the challenge).
+
+### Pre-processed data (to facilitate the competition)
+
+- **Pseudobulk scRNA-seq** — Counts aggregated per donor within **five major immune cell types** (CD4 T, CD8 T, NK, B cells, monocytes), as pseudobulk `.h5ad` objects (see tutorials).
+- **Geneformer cell-level embeddings** — For each cell, a **1,152-dimensional** vector from the **Geneformer** foundation model, distributed as split-wise parquet files (optional download due to size).
+- **Geneformer pseudobulk features** — Embeddings **aggregated per donor and cell type**; flattened across the five types this yields **5,760** numeric features per donor (`geneformer_pseudobulk_{train,val,test}.tsv.gz`).
+- **Genotype table (TSV)** — A compact **donors × SNPs** matrix (genotype calls or dosages) aligned to the same anonymised `donor_id` as the transcriptomic data, derived from the VCF for easier modelling.
+- **Genotype principal components** — **PCs** computed from the genotype matrix for each donor, supplied as a low-dimensional genetic background covariate set.
 
 ---
 
