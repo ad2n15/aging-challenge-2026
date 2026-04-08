@@ -50,11 +50,11 @@ The teaching notebooks write runs under `results/` by passing `--output-dir`. If
 
 ## Submission file
 
-Take `test_predictions.csv` and rename columns to match the submission format:
+Take `test_predictions.csv` and rename the prediction column to match the submission format (`donor_id`, `age`):
 
 ```python
 import pandas as pd
 df = pd.read_csv("models/output/TIMESTAMP/test_predictions.csv")
-df = df.rename(columns={"donor_id": "sample_id"})
-df[["sample_id", "predicted_age"]].to_csv("my_submission.csv", index=False)
+df = df.rename(columns={"predicted_age": "age"})
+df[["donor_id", "age"]].to_csv("my_submission.csv", index=False)
 ```

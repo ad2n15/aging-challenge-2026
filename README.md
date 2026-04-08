@@ -7,6 +7,8 @@
 
 ## Introduction
 
+![Time and biological aging](images/Time_aging.jpg)
+
 Ageing impacts our immune systems, increasing the susceptibility to inflammation-driven disorders, including non-malignant diseases such as atherosclerotic cardiovascular diseases, and malignant diseases such as blood cancers. "Aging clock" is the using of machine-learning methods to capture the dynamics of aging through the integration of aging-related markers at the molecular level. Single-cell RNA-sequencing (scRNA-seq) provide the potential to develop cell-type-specific aging models.
 
 ---
@@ -59,6 +61,42 @@ File paths and column-level specs: [data/README.md](data/README.md).
 - **Geneformer pseudobulk features** — Embeddings **aggregated per donor and cell type**; flattened across the five types this yields **5,760** numeric features per donor (`geneformer_pseudobulk_{train,val,test}.tsv.gz`).
 - **Genotype table (TSV)** — A compact **donors × SNPs** matrix (genotype calls or dosages) aligned to the same anonymised `donor_id` as the transcriptomic data, derived from the VCF for easier modelling.
 - **Genotype principal components** — **PCs** computed from the genotype matrix for each donor, supplied as a low-dimensional genetic background covariate set.
+
+---
+
+## Evaluation
+
+Final evaluation is based on predicting **chronological age for all 105 test-set donors** (true ages are held by the organisers until after the submission deadline).
+
+Each team submits **one CSV file** with exactly **two columns**:
+
+| Column | Description |
+|--------|-------------|
+| `donor_id` | Anonymised competition donor identifier (same integers as in `test.h5ad` and in `submission/submission_template.csv`) |
+| `age` | Predicted age in years (float; values need not be whole numbers) |
+
+Example:
+
+```csv
+donor_id,age
+10,42.3
+106,67.1
+111,28.9
+```
+
+You must include **one row per test donor** (all **105** donors). See [Submission Format](#submission-format) for how to send the file and for penalties if donors are missing or duplicated.
+
+**Ranking.** Submissions are ranked by **mean absolute error (MAE)** between predicted and true age. The winning team is the one with the **lowest MAE**.
+
+For **transparency**, and for **tie-breaking**, we also report **RMSE**, **R²**, **Pearson** correlation, and **Spearman** correlation between predictions and true ages. Unless stated otherwise at the deadline, tie-break order is: **MAE** (primary) → **RMSE** → **Pearson r** → **Spearman ρ** → **R²**.
+
+**Presentations.** The **top three** teams will be invited to present at the **12 May 2026** final event. Teams are encouraged to describe their **model architecture**, **input features** (and data modalities), and **which features or signals** most strongly drive predictions (e.g. feature importance, ablations, or interpretability).
+
+---
+
+## Prizes
+
+The **winning team** (lowest MAE on the held-out test set) will receive **Amazon vouchers**, provided by the **Institute for Life Sciences** (University of Southampton).
 
 ---
 
@@ -265,18 +303,18 @@ On the Iridis HPC cluster, prepend `sbatch run_binemo_AMD.sh` to each command.
 
 ## Submission Format
 
-Submit a **CSV file** with exactly two columns:
+Submit a **CSV file** with exactly two columns (same as in [Evaluation](#evaluation)):
 
 ```csv
-sample_id,predicted_age
-1,42.3
-2,67.1
-3,28.9
+donor_id,age
+10,42.3
+106,67.1
+111,28.9
 ...
 ```
 
-- `sample_id` = the anonymised integer `donor_id` from `test.h5ad`
-- `predicted_age` = your predicted age (float, years)
+- `donor_id` — anonymised integer ID for each test donor (as in `test.h5ad`)
+- `age` — predicted chronological age in years (float)
 - Must include **all 105 test donors** — missing donors score as MAE = 40
 
 See `submission/submission_template.csv` for the list of test donor IDs.
@@ -288,13 +326,9 @@ Submissions are due before the hackathon event on **13 April 2026**.
 
 ---
 
-## Evaluation Metrics
+## Evaluation metrics (reference)
 
-Submissions are ranked by **MAE (Mean Absolute Error)** — lower is better.
-
-We also report RMSE, R², Pearson r, and Spearman ρ for reference.
-
-See `notebooks/03_evaluation_metrics.ipynb` for a full explanation with examples.
+Primary ranking and tie-breaks are described under [Evaluation](#evaluation). For intuition on **MAE**, **RMSE**, **R²**, **Pearson**, and **Spearman** on a labelled set (e.g. your validation predictions), see `notebooks/03_evaluation_metrics.ipynb`.
 
 ---
 
@@ -344,7 +378,7 @@ A: Yes, but your submission must include predictions for all 105 test donors.
 A: Floats. Even though ground-truth ages are integers, your model will output continuous values.
 
 **Q: How are ties broken?**  
-A: By RMSE, then Pearson r.
+A: See [Evaluation](#evaluation): after MAE, by RMSE, then Pearson r, then Spearman ρ, then R² unless organisers specify otherwise.
 
 **Q: Can I submit multiple times?**  
 A: Yes — we score the last submission before the deadline.
