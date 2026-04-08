@@ -2,7 +2,18 @@
 
 Data files are too large for git (~20 GB total). They are available on the **Iridis shared space**.
 
-**Layout:** place files under **`data/`** at the repository root (same layout as the shared `.../aging-challenge-2026/data` folder). Teaching notebooks read paths like `data/pseudobulk/...`, `data/geneformer/...` (donor-level TSV features), and optionally `data/geneformer_parquet/...` (large cell-level parquet — train/val include `age`; **test** has no `age`). Generated plots and training runs from notebooks go under **`results/`** (gitignored).
+**Layout:** mirror the shared scratch tree under **`data/`**. Top-level subfolders (created by `scripts/prepare_shared_scratch.sh`):
+
+| Directory | Contents |
+|-----------|----------|
+| **`scRNA-seq_raw/`** | `train.h5ad`, `val.h5ad`, `test.h5ad` (cell × gene counts) |
+| **`scRNA-seq_pseudobulk/`** | Split donor-aggregated pseudobulk `*_public.h5ad` (test ages stripped) |
+| **`scRNA-seq_geneformer/`** | Cell-level Geneformer parquets (train/val include `age`; **test** has no `age`) |
+| **`scRNA-seq_geneformer_pseudobulk/`** | `geneformer_pseudobulk_{train,val,test}.tsv.gz` |
+| **`genotypes/`** | Competition VCF (or `.vcf.gz`), `Onek1k_competition_gt.tsv`, `pca_{train,val,test}.tsv` |
+| **`metadata/`** | `donor_metadata.csv`, optional `splits_info.csv` |
+
+There is **no** single combined cell-level `combined_public.h5ad` or long-form combined pseudobulk in the published bundle. Notebook outputs go under **`results/`** (gitignored).
 
 ### Iridis shared scratch — use `data/`, not `data_prep/output/`
 
@@ -18,23 +29,19 @@ There is **no** `.../data_prep/output/combined.h5ad` on shared space. The separa
 # From inside your cloned repo:
 cd ~/aging-challenge-2026
 
-mkdir -p data/pseudobulk data/geneformer data/geneformer_parquet
+SCR=/scratch/aazd1f17/shared_space/aging-challenge-2026/data
 
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/train.h5ad          data/
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/val.h5ad            data/
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/test.h5ad           data/
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/combined_public.h5ad       data/
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/donor_metadata.csv  data/
+mkdir -p data/scRNA-seq_raw data/scRNA-seq_pseudobulk data/scRNA-seq_geneformer \
+         data/scRNA-seq_geneformer_pseudobulk data/genotypes data/metadata
 
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/pseudobulk/combined_pseudobulk_combined_public.h5ad         data/pseudobulk/
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/pseudobulk/combined_pseudobulk_donor_aggregated_public.h5ad data/pseudobulk/
+cp -a "${SCR}/scRNA-seq_raw/."                       data/scRNA-seq_raw/
+cp -a "${SCR}/scRNA-seq_pseudobulk/."                data/scRNA-seq_pseudobulk/
+cp -a "${SCR}/scRNA-seq_geneformer_pseudobulk/."     data/scRNA-seq_geneformer_pseudobulk/
+cp -a "${SCR}/genotypes/."                           data/genotypes/
+cp -a "${SCR}/metadata/."                            data/metadata/
 
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer/geneformer_pseudobulk_train.tsv.gz data/geneformer/
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer/geneformer_pseudobulk_val.tsv.gz   data/geneformer/
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer/geneformer_pseudobulk_test.tsv.gz  data/geneformer/
-
-# Optional (~6.5 GB): cell-level Geneformer parquets for notebook 04 (test file has no age column)
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/data/geneformer_parquet/*.parquet data/geneformer_parquet/
+# Optional (~6.5 GB): cell-level Geneformer parquets (notebook 04)
+cp "${SCR}/scRNA-seq_geneformer/"*.parquet data/scRNA-seq_geneformer/ 2>/dev/null || true
 ```
 
 ### Avoid copying (Apptainer bind)
@@ -48,24 +55,21 @@ Paths are relative to **`data/`**.
 | Notebook | Files required |
 |----------|---------------|
 | `00_biology_genome_and_ngs_primer` | *None* (conceptual background only) |
-| `01_anndata_and_pseudobulk` | `combined_public.h5ad`, `pseudobulk/combined_pseudobulk_combined_public.h5ad`, `pseudobulk/combined_pseudobulk_donor_aggregated_public.h5ad` |
-| `02_baseline_model` | `pseudobulk/combined_pseudobulk_donor_aggregated_public.h5ad` |
-| `03_evaluation_metrics` | training run outputs under `results/` + optional `test_labels_hidden.csv` in `data/` for real test metrics |
-| `04_geneformer_embeddings` | `geneformer/geneformer_pseudobulk_{train,val,test}.tsv.gz`; optional `geneformer_parquet/*.parquet` for raw cell embeddings |
-| **Model training (CLI)** | Pass `--input data/pseudobulk/combined_pseudobulk_donor_aggregated_public.h5ad` (defaults in `train_age_model.py` may still point at `data_prep/output/` for internal use). |
-| **Submission** | `train.h5ad`, `val.h5ad`, `test.h5ad` (if building your own features) |
+| `01_anndata_and_pseudobulk` | `scRNA-seq_raw/{train,val,test}.h5ad`; `scRNA-seq_pseudobulk/{train,val,test}_pseudobulk_donor_aggregated_public.h5ad` |
+| `02_baseline_model` | `scRNA-seq_pseudobulk/train_pseudobulk_donor_aggregated_public.h5ad` (optionally merge train+val locally) |
+| `03_evaluation_metrics` | `results/` + optional `test_labels_hidden.csv` (not on shared scratch) |
+| `04_geneformer_embeddings` | `scRNA-seq_geneformer_pseudobulk/geneformer_pseudobulk_*.tsv.gz`; optional `scRNA-seq_geneformer/*.parquet` |
+| **Model training (CLI)** | e.g. `--input data/scRNA-seq_pseudobulk/train_pseudobulk_donor_aggregated_public.h5ad` |
+| **Submission** | `scRNA-seq_raw/{train,val,test}.h5ad` if building features from raw cells |
 
 ## File sizes
 
 | File | Size |
 |------|------|
-| `train.h5ad` | 7.8 GB |
-| `val.h5ad` | 1.0 GB |
-| `test.h5ad` | 1.1 GB |
-| `combined_public.h5ad` | 9.8 GB |
-| `pseudobulk/combined_pseudobulk_donor_aggregated_public.h5ad` | 1.1 GB |
-| `pseudobulk/combined_pseudobulk_combined_public.h5ad` | 1.1 GB |
-| `geneformer/*.tsv.gz` | 26 MB total |
+| `scRNA-seq_raw/train.h5ad` (etc.) | ~8 / ~1 / ~1 GB |
+| `scRNA-seq_pseudobulk/*_public.h5ad` | ~1.1 GB total across three files |
+| `scRNA-seq_geneformer_pseudobulk/*.tsv.gz` | ~26 MB total |
+| `genotypes/` (VCF + TSV + PCs) | modest (VCF size depends on sites) |
 
 ## External users
 
@@ -85,7 +89,7 @@ Contact [IfLSAdmin@soton.ac.uk](mailto:IfLSAdmin@soton.ac.uk) for a download lin
 | `pct_counts_mt` | % mitochondrial reads (QC metric) |
 | `pool_number` | Sequencing pool ID |
 
-### donor_metadata.csv columns
+### metadata/donor_metadata.csv columns
 
 | Column | Description |
 |--------|-------------|
@@ -103,16 +107,17 @@ The internal pipeline CSV can include ages for test donors; `prepare_shared_scra
 Internal pipeline objects may still contain `age` on test rows. To write **new** files with test `age` set to missing (NaN), leaving train/val unchanged:
 
 ```bash
+python scripts/split_pseudobulk_donor_aggregated.py   # if needed: split donor-aggregated pseudobulk
 python scripts/strip_test_age_h5ad.py --input-dir /path/to/internal --output-dir /path/to/staging
 # default output when `data_prep/output/` exists: `data_prep/output_public/`
-# default filenames: `combined_public.h5ad`, `pseudobulk/combined_pseudobulk_*_public.h5ad`
+# typical publish outputs: `pseudobulk/{train,val,test}_pseudobulk_donor_aggregated_public.h5ad` (no combined cell-level h5ad required)
 ```
 
-`scripts/prepare_shared_scratch.sh` copies those `*_public.h5ad` files into shared `data/` **with the same names** (no rename) and clears test-split ages in `donor_metadata.csv`.
+`scripts/prepare_shared_scratch.sh` writes the six directories above: raw h5ad → **`scRNA-seq_raw/`**; stripped split pseudobulk → **`scRNA-seq_pseudobulk/`**; parquets → **`scRNA-seq_geneformer/`**; Geneformer TSVs → **`scRNA-seq_geneformer_pseudobulk/`**; VCF/GT/PCs → **`genotypes/`**; `donor_metadata.csv` (+ optional `splits_info.csv`) → **`metadata/`** (test `age` cleared in metadata).
 
 ### Verify test split has no age (release check)
 
-After `data/` is populated, organisers can confirm that rows with `_split == 'test'` have no finite `age` in the combined and pseudobulk objects:
+After `data/` is populated, organisers can confirm that rows with `_split == 'test'` have no finite `age` in the published h5ad objects:
 
 ```bash
 python scripts/check_test_age_withheld.py
@@ -125,20 +130,19 @@ Exit code `0` means no test-age leak was detected; `1` means a file is missing, 
 
 | File | Size |
 |------|------|
-| train.h5ad | ~4 GB |
-| val.h5ad | ~0.5 GB |
-| test.h5ad | ~0.6 GB |
-| combined_pseudobulk_donor_aggregated_public.h5ad | ~1 GB |
+| `scRNA-seq_raw/*.h5ad` | similar to table above |
+| `scRNA-seq_pseudobulk/*_public.h5ad` | ~0.2–0.5 GB each |
 
 ## Building Pseudobulk Yourself
 
 If you want to rebuild pseudobulk from scratch (e.g. with different cell types):
 
 ```bash
-# First combine the splits into one file
+# First combine the splits into one file (adjust paths if your data live under scRNA-seq_raw/)
 python -c "
 import scanpy as sc
-splits = [sc.read_h5ad('train.h5ad'), sc.read_h5ad('val.h5ad'), sc.read_h5ad('test.h5ad')]
+base = 'scRNA-seq_raw'
+splits = [sc.read_h5ad(f'{base}/train.h5ad'), sc.read_h5ad(f'{base}/val.h5ad'), sc.read_h5ad(f'{base}/test.h5ad')]
 combined = sc.concat(splits, join='inner')
 combined.write_h5ad('combined_for_pseudobulk.h5ad')
 "

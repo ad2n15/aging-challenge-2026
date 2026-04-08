@@ -4,7 +4,7 @@
 *.hdf5
 data_prep/output/
 data/onek1k/
-data/geneformer_parquet/*.parquet
+data/scRNA-seq_geneformer/*.parquet
 
 # ── Notebook / run outputs (generated locally) ───────────────────────────────
 results/

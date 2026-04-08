@@ -38,11 +38,13 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 # Paths — override any of these with CLI arguments
 PROJ_ROOT = Path(__file__).resolve().parents[1]
-PSEUDOBULK_AGG_PATH = PROJ_ROOT / "data_prep" / "output" / "pseudobulk" / "combined_pseudobulk_donor_aggregated.h5ad"
-GENOTYPE_PCA_PATH   = PROJ_ROOT / "data_prep" / "output" / "genotypes" / "onek1k_pca_donor_aligned.tsv"
-PRS_PATH            = PROJ_ROOT / "data_prep" / "output" / "genotypes" / "prs_donor_aligned.tsv"
-GENEFORMER_DIR      = PROJ_ROOT / "data_prep" / "output" / "geneformer"
-DONOR_METADATA_PATH = PROJ_ROOT / "data_prep" / "output" / "donor_metadata.csv"
+PSEUDOBULK_AGG_PATH = (
+    PROJ_ROOT / "data" / "scRNA-seq_pseudobulk" / "train_pseudobulk_donor_aggregated_public.h5ad"
+)
+GENOTYPE_PCA_PATH = PROJ_ROOT / "data" / "genotypes" / "pca_train.tsv"
+PRS_PATH = PROJ_ROOT / "data" / "genotypes" / "prs_donor_aligned.tsv"
+GENEFORMER_DIR = PROJ_ROOT / "data" / "scRNA-seq_geneformer_pseudobulk"
+DONOR_METADATA_PATH = PROJ_ROOT / "data" / "metadata" / "donor_metadata.csv"
 OUTPUT_BASE         = PROJ_ROOT / "models" / "output"
 
 
@@ -196,20 +198,20 @@ def main():
     parser.add_argument("--genotype-pca", type=str, default=None, nargs="?",
                         const=str(GENOTYPE_PCA_PATH),
                         help="Append genotype PCA features. Optionally pass a custom TSV path "
-                             "(default: data_prep/output/genotypes/onek1k_pca_donor_aligned.tsv).")
+                             "(default: data/genotypes/pca_train.tsv; val/test PCs also under data/genotypes/).")
     parser.add_argument("--prs", type=str, default=None, nargs="?",
                         const=str(PRS_PATH),
                         help="Append PRS as a single feature column. Optionally pass a custom TSV path "
-                             "(default: data_prep/output/genotypes/prs_donor_aligned.tsv). "
-                             "Requires data_prep/prepare_prs.py to have been run.")
+                             "(default: data/genotypes/prs_donor_aligned.tsv if present). "
+                             "Requires organisers to ship PRS; otherwise omit.")
     parser.add_argument("--compare-pca", action="store_true",
                         help="Run all enabled modality combinations and print comparison.")
     parser.add_argument("--geneformer", type=str, default=None, nargs="?",
                         const=str(GENEFORMER_DIR),
                         help="Append Geneformer pseudobulk features (5,760 dims). Optionally "
                              "pass a custom directory path "
-                             "(default: data_prep/output/geneformer/). "
-                             "Run data_prep/aggregate_geneformer_embeddings.py first.")
+                             "(default: data/scRNA-seq_geneformer_pseudobulk/). "
+                             "Files: geneformer_pseudobulk_{train,val,test}.tsv.gz")
     parser.add_argument("--geneformer-only", action="store_true",
                         help="Use ONLY Geneformer features as the base (skip pseudobulk h5ad). "
                              "Implies --geneformer with the default directory.")
@@ -218,8 +220,7 @@ def main():
                              "Requires donor_metadata.csv (see --donor-metadata).")
     parser.add_argument("--donor-metadata", type=str, default=None,
                         help="Path to donor_metadata.csv containing sex_binary column. "
-                             "Default: data_prep/output/donor_metadata.csv (Onek1K). "
-                             "For AIDA use: data_prep/output/aida/donor_metadata.csv")
+                             "Default: data/metadata/donor_metadata.csv.")
     args = parser.parse_args()
 
     # --geneformer-only implies --geneformer

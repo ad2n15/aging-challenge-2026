@@ -12,13 +12,13 @@
 ```bash
 # 1. Train baseline (place competition h5ad under data/ — see data/README.md)
 python models/train_age_model.py \
-    --input data/pseudobulk/combined_pseudobulk_donor_aggregated.h5ad
+    --input data/scRNA-seq_pseudobulk/train_pseudobulk_donor_aggregated_public.h5ad
 
 # 2. Evaluate on validation set
 python models/evaluate_val.py --plot
 ```
 
-The teaching notebooks write runs under `results/` by passing `--output-dir`. If you omit `--input` and `--output-dir`, `train_age_model.py` still defaults to paths under `data_prep/output/` and `models/output/` for backwards compatibility.
+The teaching notebooks write runs under `results/` by passing `--output-dir`. If you omit `--input`, defaults assume the **`data/`** layout from `data/README.md` (shared scratch) and `models/output/` for runs.
 
 ## train_age_model.py — options
 

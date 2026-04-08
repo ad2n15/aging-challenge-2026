@@ -142,6 +142,7 @@ Replace `$HOME/aging-challenge-2026` if your repo lives elsewhere. **Do not use 
 
 ```bash
 srun --partition=amd --nodes=1 --time=2:00 ls /scratch/aazd1f17/shared_space/aging-challenge-2026/data
+# Expect: scRNA-seq_raw  scRNA-seq_pseudobulk  scRNA-seq_geneformer  scRNA-seq_geneformer_pseudobulk  genotypes  metadata
 ```
 
 If that fails, ask the cluster admins whether `/scratch/aazd1f17` is visible on batch nodes, or keep using **local copies** of the data (see `data/README.md`).
@@ -173,15 +174,13 @@ Download the competition data package from the link provided in the registration
 **Iridis users:** data is already available — see Step 1 above.
 
 ```
-aging_challenge_data/
-├── onek1k/
-│   ├── train.h5ad                               # 781 donors — age included
-│   ├── val.h5ad                                 #  95 donors — age included
-│   ├── test.h5ad                                # 105 donors — age EXCLUDED
-│   ├── pseudobulk/
-│   │   └── combined_pseudobulk_donor_aggregated.h5ad   # 981 donors × 141,390 features
-│   └── donor_metadata.csv                       # donor_id, split, sex
-└── README_data.md                               # data dictionary
+data/   (see data/README.md — Iridis: same layout under shared scratch)
+├── scRNA-seq_raw/           # train.h5ad, val.h5ad, test.h5ad (per-split cells × genes)
+├── scRNA-seq_pseudobulk/    # split donor-aggregated *_public.h5ad (test ages stripped)
+├── scRNA-seq_geneformer/    # cell-level Geneformer parquets (optional)
+├── scRNA-seq_geneformer_pseudobulk/   # geneformer_pseudobulk_{train,val,test}.tsv.gz
+├── genotypes/               # competition VCF, GT TSV, pca_{train,val,test}.tsv
+└── metadata/                # donor_metadata.csv (+ optional splits_info.csv)
 ```
 
 ### What is in the h5ad files
@@ -192,7 +191,7 @@ Each h5ad file contains:
 
 ### Donor metadata
 
-`donor_metadata.csv` contains: `donor_id`, `split`, `sex`, `sex_binary` (0=female, 1=male).
+`metadata/donor_metadata.csv` contains: `donor_id`, `split`, `sex`, `sex_binary` (0=female, 1=male).
 **Age is NOT included for test donors.**
 
 ### Gene names
