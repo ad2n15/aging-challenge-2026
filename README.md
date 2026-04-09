@@ -10,10 +10,12 @@ Programme timetable: [tables/AI_hackathon_14th_april_time_table.md](tables/AI_ha
 
 ## Introduction
 
+*"A century of life was once a rare thing, but that is changing. Science is slowly unraveling the secrets of the centenarians, ..."* — *Time Magazine*, Feb 2010  
+
 ![Time and biological aging](images/Time_aging.jpg)
 
 Living longer and staying healthy is a widely shared hope among the public and a focus for studying ageing and diseases. However, chronological ageing still alters our biology in ways that can undermine that goal. Ageing impacts our immune systems, increasing susceptibility to inflammation-driven disorders, including non-malignant diseases such as atherosclerotic cardiovascular disease, and malignant diseases such as blood cancers.
-An **aging clock** uses machine-learning methods to capture the dynamics of ageing by integrating ageing-related markers at the molecular level. We and others beleive that Single-cell RNA-sequencing (scRNA-seq) offers the potential to develop cell-type-specific ageing models.
+An **aging clock** uses machine-learning methods to capture the dynamics of ageing by integrating ageing-related markers at the molecular level. We and others believe that Single-cell RNA-sequencing (scRNA-seq) offers the potential to develop cell-type-specific ageing models.
 
 ---
 
@@ -108,21 +110,22 @@ The **winning team** (lowest MAE on the held-out test set) will receive **Amazon
 
 ### Step 1 — Copy repository and container
 
-To copy the pre-staged competition repository and container to your home directory:
+Go to [https://iridisondemand.soton.ac.uk/pun/sys/dashboard](https://iridisondemand.soton.ac.uk/pun/sys/dashboard) and log in with your Iridis credentials.
 
-1. Open **Home Directory** from the Files list.
+To copy the pre-staged competition repository and container to your scratch space:
+
+1. Open **scratch/$USER** from the Files list.
 2. Select **Open in Terminal**.
 3. Run:
 
 ```bash
-cp -r /iridisfs/aihackathon/aging-challenge-2026 ~/aging-challenge-2026
-cp /iridisfs/aihackathon/aging-challenge-2026/container/bionemo-framework_nightly.sif \
-   ~/aging-challenge-2026/container/
+cp -r /iridisfs/aihackathon/aging-challenge-2026 /scratch/$USER
+
 ```
 
 This gives you:
 ```
-~/aging-challenge-2026/
+/scratch/$USER/aging-challenge-2026/
 ├── container/
 │   └── bionemo-framework_nightly.sif   ← Apptainer container (all dependencies included)
 ├── notebooks/                           ← teaching notebooks
@@ -133,10 +136,10 @@ This gives you:
 
 Alternatively, clone from GitHub and copy the container separately:
 ```bash
-git clone https://github.com/ad2n15/aging-challenge-2026.git ~/aging-challenge-2026
+git clone https://github.com/ad2n15/aging-challenge-2026.git /scratch/$USER/aging-challenge-2026
 # Container is too large for git — copy it from shared path:
 cp /iridisfs/aihackathon/aging-challenge-2026/container/bionemo-framework_nightly.sif \
-   ~/aging-challenge-2026/container/
+   /scratch/$USER/aging-challenge-2026/container/
 ```
 
 ---
@@ -155,10 +158,14 @@ Open OnDemand lets you run Jupyter notebooks interactively in the Bionemo contai
 
    | Field | Value |
    |-------|-------|
-   | **Working Directory** | `~/aging-challenge-2026` (or leave as `$HOME`) |
+   | **Node type** | `Iridis X compute Node` |
+   | **Partition** | `AMD CPU partition` (select the appropriate option for your account: UG / PGT / PGR / staff) |
+   | **Number of Physical cores** | default `6`, maximum `32` |
+   | **Walltime (hours)** | default `2`, maximum `60` |
+   | **Working Directory** | `/scratch/$USER/aging-challenge-2026` |
    | **User Interface** | `Jupyter Lab` |
    | **Submission Environment** | `Apptainer Environment` |
-   | **Container File** | `/iridisfs/aihackathon/aging-challenge-2026/container/bionemo-framework_nightly.sif` — or, if you copied it locally: `~/aging-challenge-2026/container/bionemo-framework_nightly.sif` |
+   | **Container File** | `/scratch/$USER/aging-challenge-2026/container/bionemo-framework_nightly.sif` |
 
 4. Click **Launch** and wait for the session to start (~1–2 min).
 
@@ -171,7 +178,7 @@ Open OnDemand lets you run Jupyter notebooks interactively in the Bionemo contai
 For longer runs (training, pseudobulk generation), submit via SLURM:
 
 ```bash
-cd ~/aging-challenge-2026
+cd /scratch/$USER/aging-challenge-2026
 
 # Train baseline model
 sbatch run_binemo_AMD.sh models/train_age_model.py \
