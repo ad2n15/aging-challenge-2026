@@ -12,7 +12,8 @@ Programme timetable: [tables/AI_hackathon_14th_april_time_table.md](tables/AI_ha
 
 ![Time and biological aging](images/Time_aging.jpg)
 
-Living longer—and staying healthy in later life—is a widely shared hope among the public and a major focus for researchers who study ageing and disease. However, chronological ageing still alters our biology in ways that can undermine that goal. Ageing impacts our immune systems, increasing susceptibility to inflammation-driven disorders, including non-malignant diseases such as atherosclerotic cardiovascular disease, and malignant diseases such as blood cancers. An **aging clock** uses machine-learning methods to capture the dynamics of ageing by integrating ageing-related markers at the molecular level. Single-cell RNA-sequencing (scRNA-seq) offers the potential to develop cell-type-specific ageing models.
+Living longer and staying healthy is a widely shared hope among the public and a focus for studying ageing and diseases. However, chronological ageing still alters our biology in ways that can undermine that goal. Ageing impacts our immune systems, increasing susceptibility to inflammation-driven disorders, including non-malignant diseases such as atherosclerotic cardiovascular disease, and malignant diseases such as blood cancers.
+An **aging clock** uses machine-learning methods to capture the dynamics of ageing by integrating ageing-related markers at the molecular level. We and others beleive that Single-cell RNA-sequencing (scRNA-seq) offers the potential to develop cell-type-specific ageing models.
 
 ---
 
@@ -105,13 +106,18 @@ The **winning team** (lowest MAE on the held-out test set) will receive **Amazon
 
 ## Getting Started on Iridis X (University of Southampton HPC)
 
-### Step 1 — Get the repository and container
+### Step 1 — Copy repository and container
 
-The competition repo and the Bionemo container are pre-staged on the shared scratch space.
-Copy them to your home directory:
+To copy the pre-staged competition repository and container to your home directory:
+
+1. Open **Home Directory** from the Files list.
+2. Select **Open in Terminal**.
+3. Run:
 
 ```bash
-cp -r /scratch/aazd1f17/shared_space/aging-challenge-2026 ~/aging-challenge-2026
+cp -r /iridisfs/aihackathon/aging-challenge-2026 ~/aging-challenge-2026
+cp /iridisfs/aihackathon/aging-challenge-2026/container/bionemo-framework_nightly.sif \
+   ~/aging-challenge-2026/container/
 ```
 
 This gives you:
@@ -125,17 +131,17 @@ This gives you:
 └── ...
 ```
 
-Alternatively, clone from GitHub and download the container separately:
+Alternatively, clone from GitHub and copy the container separately:
 ```bash
 git clone https://github.com/ad2n15/aging-challenge-2026.git ~/aging-challenge-2026
-# Container is too large for git — copy it from shared space:
-cp /scratch/aazd1f17/shared_space/aging-challenge-2026/container/bionemo-framework_nightly.sif \
+# Container is too large for git — copy it from shared path:
+cp /iridisfs/aihackathon/aging-challenge-2026/container/bionemo-framework_nightly.sif \
    ~/aging-challenge-2026/container/
 ```
 
 ---
 
-### Step 2 — Launch Jupyter via Open OnDemand
+### Step 2 — Launch Jupyter onIridisOndemand
 
 Open OnDemand lets you run Jupyter notebooks interactively in the Bionemo container
 **without writing any SLURM scripts**.
@@ -143,7 +149,7 @@ Open OnDemand lets you run Jupyter notebooks interactively in the Bionemo contai
 1. Go to **[https://iridisondemand.soton.ac.uk/pun/sys/dashboard](https://iridisondemand.soton.ac.uk/pun/sys/dashboard)**
    and log in with your Iridis credentials.
 
-2. Click the **"Jupyter with Apptainer Test"** icon.
+2. Click the **"Jupyter onIridisOndemand"** icon.
 
 3. Fill in the form:
 
@@ -151,42 +157,12 @@ Open OnDemand lets you run Jupyter notebooks interactively in the Bionemo contai
    |-------|-------|
    | **Working Directory** | `~/aging-challenge-2026` (or leave as `$HOME`) |
    | **User Interface** | `Jupyter Lab` |
-   | **Submission Environment** | `container (advanced)` |
-   | **Container File** | `/scratch/aazd1f17/shared_space/aging-challenge-2026/container/bionemo-framework_nightly.sif` — or, if you copied it locally: `~/aging-challenge-2026/container/bionemo-framework_nightly.sif` |
-   | **Apptainer flags** | `--nv --bind $PWD:$PWD --pwd $PWD` |
+   | **Submission Environment** | `Apptainer Environment` |
+   | **Container File** | `/iridisfs/aihackathon/aging-challenge-2026/container/bionemo-framework_nightly.sif` — or, if you copied it locally: `~/aging-challenge-2026/container/bionemo-framework_nightly.sif` |
 
 4. Click **Launch** and wait for the session to start (~1–2 min).
 
 5. In the Jupyter file browser, open notebooks under `notebooks/`. New to molecular biology? Start with **`00_biology_genome_and_ngs_primer.ipynb`**, then **`01_anndata_and_pseudobulk.ipynb`**.
-
-#### Use shared data without copying (optional)
-
-Notebooks expect competition files under **`data/`** at the repo root (see `data/README.md`). They do **not** read from `/scratch/...` unless you bind or symlink that path into `data/`.
-
-Binding scratch to itself (`--bind /scratch/.../data:/scratch/.../data`) often **fails** because:
-
-- That path may not exist on the **compute node** where Jupyter runs (scratch layout can differ from the login node).
-- Even when it works, nothing points your code at that path — you would still need symlinks or code changes.
-
-**Working pattern:** mount the shared folder **on top of** `data/` in your clone (second bind overlays that directory only):
-
-```text
---nv \
---bind $HOME/aging-challenge-2026:$HOME/aging-challenge-2026 \
---bind /scratch/aazd1f17/shared_space/aging-challenge-2026/data:$HOME/aging-challenge-2026/data \
---pwd $HOME/aging-challenge-2026
-```
-
-Replace `$HOME/aging-challenge-2026` if your repo lives elsewhere. **Do not use `-H $PWD`** here unless you know your home is writable inside the container; the two `--bind` lines above are enough.
-
-**Check access from a compute node** (login node is not enough):
-
-```bash
-srun --partition=amd --nodes=1 --time=2:00 ls /scratch/aazd1f17/shared_space/aging-challenge-2026/data
-# Expect: scRNA-seq_raw  scRNA-seq_pseudobulk  scRNA-seq_geneformer  scRNA-seq_geneformer_pseudobulk  genotypes  metadata
-```
-
-If that fails, ask the cluster admins whether `/scratch/aazd1f17` is visible on batch nodes, or keep using **local copies** of the data (see `data/README.md`).
 
 ---
 
