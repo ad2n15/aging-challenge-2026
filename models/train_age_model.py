@@ -151,7 +151,7 @@ def print_metrics(label, m, prefix="  "):
 # ---------------------------------------------------------------------------
 
 def train_and_evaluate(X_train, y_train, X_val, y_val, X_test,
-                       test_donors, feat_names,
+                       test_donors, val_donors, feat_names,
                        n_estimators, max_depth, seed):
     rf = RandomForestRegressor(
         n_estimators=n_estimators,
@@ -161,9 +161,15 @@ def train_and_evaluate(X_train, y_train, X_val, y_val, X_test,
     )
     rf.fit(X_train, y_train)
 
-    val_metrics = compute_metrics(y_val, rf.predict(X_val))
-    y_test_pred = rf.predict(X_test)
-    pred_df = pd.DataFrame({"donor_id": test_donors, "predicted_age": y_test_pred})
+    y_val_pred = rf.predict(X_val)
+    val_metrics = compute_metrics(y_val, y_val_pred)
+    val_pred_df = pd.DataFrame({"donor_id": val_donors, "predicted_age": y_val_pred})
+
+    if X_test.shape[0] > 0:
+        y_test_pred = rf.predict(X_test)
+        pred_df = pd.DataFrame({"donor_id": test_donors, "predicted_age": y_test_pred})
+    else:
+        pred_df = pd.DataFrame({"donor_id": [], "predicted_age": []})
 
     # Top 20 features / genes by importance
     imp = rf.feature_importances_
@@ -175,7 +181,7 @@ def train_and_evaluate(X_train, y_train, X_val, y_val, X_test,
     top20_df = pd.DataFrame(top20, columns=["feature", "importance"])
     top20_df.insert(0, "rank", range(1, len(top20_df) + 1))
 
-    return rf, val_metrics, pred_df, top20_df
+    return rf, val_metrics, pred_df, val_pred_df, top20_df
 
 
 # ---------------------------------------------------------------------------
@@ -279,6 +285,7 @@ def main():
     val_mask   = splits == "val"
     test_mask  = splits == "test"
     test_donors = donor_ids_sc[test_mask]
+    val_donors = donor_ids_sc[val_mask]
 
     print("Train: %d, Val: %d, Test: %d" % (train_mask.sum(), val_mask.sum(), test_mask.sum()))
 
@@ -359,19 +366,21 @@ def main():
         print("\n" + "=" * 60)
         print("Configuration: %s" % label)
         print("  Features: %d" % X_mat.shape[1])
-        rf, val_m, pred_df, top20 = train_and_evaluate(
+        rf, val_m, pred_df, val_pred_df, top20 = train_and_evaluate(
             X_tr, y[train_mask], X_va, y[val_mask], X_te,
-            test_donors, feat_names,
+            test_donors, val_donors, feat_names,
             args.n_estimators, args.max_depth, args.seed,
         )
         print_metrics("Validation metrics", val_m)
-        pred_df.to_csv(run_dir / ("%s_test_predictions.csv" % save_prefix), index=False)
+        val_pred_df.to_csv(run_dir / ("%s_val_predictions.csv" % save_prefix), index=False)
+        if len(pred_df) > 0:
+            pred_df.to_csv(run_dir / ("%s_test_predictions.csv" % save_prefix), index=False)
         joblib.dump(rf, run_dir / ("%s_rf_model.joblib" % save_prefix))
         top20.to_csv(run_dir / ("%s_top_features.csv" % save_prefix), index=False)
         # Save the full ordered feature list so predict.py can align new datasets
         pd.DataFrame({"feature": feat_names}).to_csv(
             run_dir / ("%s_feature_names.csv" % save_prefix), index=False)
-        return val_m, pred_df, rf
+        return val_m, pred_df, val_pred_df, rf
 
     results = {}
 
@@ -429,7 +438,7 @@ def main():
 
         results = {}
         for key, (X_mat, f_names, human_label) in configs.items():
-            val_m, pred_df, rf = run_one(X_mat, f_names, human_label, key)
+            val_m, pred_df, val_pred_df, rf = run_one(X_mat, f_names, human_label, key)
             results[key] = val_m
 
         # Summary table
@@ -445,8 +454,12 @@ def main():
         print("\nComparison saved to %s" % (run_dir / "comparison.csv"))
 
         best = min(results, key=lambda k: results[k]["MAE"])
-        shutil.copy(run_dir / ("%s_test_predictions.csv" % best), run_dir / "test_predictions.csv")
-        print("Best config by MAE: %s → copied to test_predictions.csv" % best)
+        shutil.copy(run_dir / ("%s_val_predictions.csv" % best), run_dir / "val_predictions.csv")
+        if (run_dir / ("%s_test_predictions.csv" % best)).exists():
+            shutil.copy(run_dir / ("%s_test_predictions.csv" % best), run_dir / "test_predictions.csv")
+            print("Best config by MAE: %s → copied to val_predictions.csv and test_predictions.csv" % best)
+        else:
+            print("Best config by MAE: %s → copied to val_predictions.csv (no test split in input)" % best)
 
     else:
         # ---------------------------------------------------------------
@@ -482,8 +495,10 @@ def main():
         feat_run = feat_sub + extra_cols
         label = " + ".join(label_parts)
 
-        val_m, pred_df, rf = run_one(X_run, feat_run, label, prefix)
-        shutil.copy(run_dir / ("%s_test_predictions.csv" % prefix), run_dir / "test_predictions.csv")
+        val_m, pred_df, val_pred_df, rf = run_one(X_run, feat_run, label, prefix)
+        shutil.copy(run_dir / ("%s_val_predictions.csv" % prefix), run_dir / "val_predictions.csv")
+        if (run_dir / ("%s_test_predictions.csv" % prefix)).exists():
+            shutil.copy(run_dir / ("%s_test_predictions.csv" % prefix), run_dir / "test_predictions.csv")
 
     print("\nDone. All outputs in %s" % run_dir)
 
