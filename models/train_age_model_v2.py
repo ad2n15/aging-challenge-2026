@@ -101,6 +101,12 @@ def main() -> int:
     parser.add_argument("--max-depth", type=int, default=None)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output-dir", type=Path, default=None)
+    parser.add_argument(
+        "--show-val-metrics",
+        action="store_true",
+        help="Compute/print validation metrics during training and save val_metrics.csv. "
+             "Default: off (evaluation is expected via models/evaluate_val.py).",
+    )
     args = parser.parse_args()
 
     for p in [args.train_h5ad, args.val_h5ad, args.train_labels, args.val_labels]:
@@ -140,24 +146,23 @@ def main() -> int:
     )
     rf.fit(X_train, y_train)
     y_val_pred = rf.predict(X_val)
-    m = compute_metrics(y_val, y_val_pred)
-
-    print("\nValidation metrics:")
-    print(f"  MAE:      {m['MAE']:.3f}")
-    print(f"  RMSE:     {m['RMSE']:.3f}")
-    print(f"  R²:       {m['R2']:.3f}")
-    print(f"  Pearson:  {m['Pearson']:.3f} (p={m['Pearson_p']:.2e})")
-    print(f"  Spearman: {m['Spearman']:.3f} (p={m['Spearman_p']:.2e})")
-
     val_pred_df = pd.DataFrame({"donor_id": val_donors, "predicted_age": y_val_pred})
     val_pred_df.to_csv(run_dir / "val_predictions.csv", index=False)
     print(f"\nSaved: {run_dir / 'val_predictions.csv'}")
 
-    pd.DataFrame([{"metric": k, "value": v} for k, v in [
-        ("MAE", m["MAE"]), ("RMSE", m["RMSE"]), ("R2", m["R2"]),
-        ("Pearson", m["Pearson"]), ("Spearman", m["Spearman"]),
-    ]]).to_csv(run_dir / "val_metrics.csv", index=False)
-    print(f"Saved: {run_dir / 'val_metrics.csv'}")
+    if args.show_val_metrics:
+        m = compute_metrics(y_val, y_val_pred)
+        print("\nValidation metrics:")
+        print(f"  MAE:      {m['MAE']:.3f}")
+        print(f"  RMSE:     {m['RMSE']:.3f}")
+        print(f"  R²:       {m['R2']:.3f}")
+        print(f"  Pearson:  {m['Pearson']:.3f} (p={m['Pearson_p']:.2e})")
+        print(f"  Spearman: {m['Spearman']:.3f} (p={m['Spearman_p']:.2e})")
+        pd.DataFrame([{"metric": k, "value": v} for k, v in [
+            ("MAE", m["MAE"]), ("RMSE", m["RMSE"]), ("R2", m["R2"]),
+            ("Pearson", m["Pearson"]), ("Spearman", m["Spearman"]),
+        ]]).to_csv(run_dir / "val_metrics.csv", index=False)
+        print(f"Saved: {run_dir / 'val_metrics.csv'}")
 
     # Top feature importance aggregated by base gene
     imp = rf.feature_importances_
